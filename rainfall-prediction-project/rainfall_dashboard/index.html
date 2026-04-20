@@ -13,14 +13,13 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
 </head>
 <body>
-    <!-- Background Particles Overlay (Simulated) -->
     <div class="bg-glow"></div>
 
     <div class="container">
         <header>
             <div class="logo-container">
                 <div class="logo">AQUILA <span>PRO</span></div>
-                <div class="version">CORE v3.0.0 HEURISTIC</div>
+                <div class="version">CORE v4.0.0 ANIMATED</div>
             </div>
             <div class="nav-actions">
                 <div class="status-badge">NEURAL ENGINE ACTIVE</div>
@@ -31,15 +30,15 @@
         </header>
 
         <!-- Dynamic Overview Stats -->
-        <div class="stats-grid animate-in">
+        <div class="stats-grid">
             <div class="stat-card">
                 <span class="stat-label">Model Accuracy</span>
-                <span class="stat-value">94.2%</span>
+                <span class="stat-value" id="accuracy-val">94.2%</span>
                 <div class="stat-progress"><div class="progress-bar" style="width: 94%;"></div></div>
             </div>
             <div class="stat-card">
-                <span class="stat-label">Telemetry Influx</span>
-                <span class="stat-value">842 req/s</span>
+                <span class="stat-label">System Latency</span>
+                <span class="stat-value" id="latency-val">12ms</span>
             </div>
             <div class="stat-card">
                 <span class="stat-label">Analysis State</span>
@@ -54,7 +53,7 @@
         <main class="dashboard-grid">
             <!-- Left Panel: Input & Result -->
             <div class="left-col">
-                <section class="card animate-in">
+                <section class="card">
                     <h2>
                         <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2v20M2 12h20"/></svg>
                         Global Parameters
@@ -134,8 +133,8 @@
                     </div>
                 </section>
 
-                <!-- New Module: Regional Analysis -->
-                <section class="card animate-in delay-1 mt-2">
+                <!-- Target Geo-Zone Module -->
+                <section class="card mt-2">
                     <h2>
                         <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
                         Target Geo-Zone
@@ -159,82 +158,70 @@
 
             <!-- Right Panel: Visualizer Modules -->
             <div class="right-col">
-                <!-- Forecast Slider -->
-                <div class="card animate-in delay-2">
+                <div class="card">
                     <div class="card-header-flex">
                         <h2>
                             <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
                             Extended Probability Forecast
                         </h2>
-                        <div class="live-pulse">LIVE FEED</div>
                     </div>
-                    <div class="forecast-container" id="forecast-wrapper">
-                        <!-- Dynamic items -->
-                    </div>
+                    <div class="forecast-container" id="forecast-wrapper"></div>
                 </div>
 
-                <!-- Main Visualization -->
-                <div class="card animate-in delay-3">
+                <div class="card">
                     <h2>
                         <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"/><path d="M18 17l-6-6-4 4-5-5"/></svg>
-                        Atmospheric Telemetry Trends
+                        Telemetry Trends
                     </h2>
                     <div class="chart-container-lg">
                         <canvas id="precipChart"></canvas>
                     </div>
                 </div>
 
-                <!-- Secondary Visuals -->
                 <div class="dual-row">
-                    <div class="card animate-in delay-4">
+                    <div class="card">
                         <h3>Model Weights</h3>
                         <div class="chart-container-sm">
                             <canvas id="accuracyChart"></canvas>
                         </div>
                     </div>
-                    <div class="card animate-in delay-4">
+                    <div class="card">
                         <h3>Export System</h3>
-                        <p class="small-text">Prepare the current analysis for external reporting or cloud archival.</p>
+                        <p class="small-text">Prepare documentation for external distribution.</p>
                         <div class="btn-group-v">
-                            <button class="btn-secondary" id="export-btn">GENERATE DATASHEET</button>
-                            <button class="btn-ghost">TRIGGER API UPLOAD</button>
+                            <button class="btn-secondary" id="export-btn">GENERATE REPORT</button>
+                            <button class="btn-ghost" onclick="location.reload()">REFRESH ENGINE</button>
                         </div>
                     </div>
                 </div>
             </div>
         </main>
 
-        <!-- Sidebar / Knowledge Panel -->
-        <div class="sidebar" id="sidebar">
+        <!-- Knowledge Panel Sidebar -->
+        <div class="sidebar" id="sidebar" style="right: -400px;">
             <div class="sidebar-header">
-                <h3>METEOROLOGICAL KNOWLEDGE</h3>
+                <h3>KNOWLEDGE BASE</h3>
                 <button id="close-sidebar">&times;</button>
             </div>
             <div class="sidebar-content">
                 <div class="topic">
                     <span class="topic-tag">BASICS</span>
-                    <h4>Relative Humidity vs Rainfall</h4>
-                    <p>High relative humidity increases the likelihood but doesn't guarantee precipitation. It indicates the saturation level of the air mass.</p>
-                </div>
-                <div class="topic">
-                    <span class="topic-tag">ADVANCED</span>
-                    <h4>The Dew Point Divergence</h4>
-                    <p>When the temperature and dew point are within 3-5 degrees, the air is nearly saturated, often leading to fog or precipitation onset.</p>
+                    <h4>Humidity Logic</h4>
+                    <p>Saturation levels directly correlate to cloud formation potential.</p>
                 </div>
                 <div class="topic">
                     <span class="topic-tag">ALGORITHM</span>
-                    <h4>Aquila Pro Logic</h4>
-                    <p>Utilizing a weighted Random Forest ensemble, we simulate 500 parallel weather scenarios to arrive at the median predicted rainfall.</p>
+                    <h4>V4 Core</h4>
+                    <p>Uses weighted ensemble trees with real-time haptic feedback loops.</p>
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- UI Overlay for report generation -->
-    <div id="loader-overlay" class="overlay" style="display: none;">
+    <div id="loader-overlay" class="overlay" style="display: none; opacity: 0;">
         <div class="loader-content">
             <div class="spinner"></div>
-            <p>CONSTRUCTIONG ANALYTIC DATASHEET...</p>
+            <p>CONSTRUCTING DATASHEET...</p>
         </div>
     </div>
 
