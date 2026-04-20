@@ -3,119 +3,239 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AQUILA AI | Advanced Rainfall Prediction</title>
-    <meta name="description" content="Advanced Rainfall Prediction System using machine learning and real-time weather metrics.">
+    <title>AQUILA PRO | Predictive Neural Meteorology</title>
+    <meta name="description" content="Professional Rainfall Prediction System powered by neural atmospheric analysis and multi-source telemetry.">
     <link rel="stylesheet" href="style.css">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&family=JetBrains+Mono:wght@500&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
 </head>
 <body>
+    <!-- Background Particles Overlay (Simulated) -->
+    <div class="bg-glow"></div>
+
     <div class="container">
         <header>
-            <div class="logo">AQUILA AI</div>
-            <div class="status-badge">MODEL ACTIVE v2.4.0</div>
+            <div class="logo-container">
+                <div class="logo">AQUILA <span>PRO</span></div>
+                <div class="version">CORE v3.0.0 HEURISTIC</div>
+            </div>
+            <div class="nav-actions">
+                <div class="status-badge">NEURAL ENGINE ACTIVE</div>
+                <button class="icon-btn" id="toggle-sidebar" title="Knowledge Base">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>
+                </button>
+            </div>
         </header>
 
+        <!-- Dynamic Overview Stats -->
+        <div class="stats-grid animate-in">
+            <div class="stat-card">
+                <span class="stat-label">Model Accuracy</span>
+                <span class="stat-value">94.2%</span>
+                <div class="stat-progress"><div class="progress-bar" style="width: 94%;"></div></div>
+            </div>
+            <div class="stat-card">
+                <span class="stat-label">Telemetry Influx</span>
+                <span class="stat-value">842 req/s</span>
+            </div>
+            <div class="stat-card">
+                <span class="stat-label">Analysis State</span>
+                <span class="stat-value status-glow" id="stability-val">OPTIMAL</span>
+            </div>
+            <div class="stat-card">
+                <span class="stat-label">Last Retrain</span>
+                <span class="stat-value">04:20:00</span>
+            </div>
+        </div>
+
         <main class="dashboard-grid">
-            <!-- Left Panel: Input Form -->
-            <section class="card animate-in">
-                <h2>
-                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2v20M2 12h20"/></svg>
-                    Analysis Parameters
-                </h2>
-                
-                <form id="prediction-form">
-                    <div class="input-group">
-                        <label for="temp">Average temperature</label>
-                        <div class="input-wrapper">
-                            <input type="number" id="temp" value="75" step="0.1">
-                            <span class="unit">°F</span>
-                        </div>
-                    </div>
-
-                    <div class="input-group">
-                        <label for="dewpoint">Average Dew Point</label>
-                        <div class="input-wrapper">
-                            <input type="number" id="dewpoint" value="65" step="0.1">
-                            <span class="unit">°F</span>
-                        </div>
-                    </div>
-
-                    <div class="input-group">
-                        <label for="humidity">Average Humidity</label>
-                        <div class="input-wrapper">
-                            <input type="number" id="humidity" value="55" step="1" min="0" max="100">
-                            <span class="unit">%</span>
-                        </div>
-                    </div>
-
-                    <div class="input-group">
-                        <label for="pressure">Sea Level Pressure</label>
-                        <div class="input-wrapper">
-                            <input type="number" id="pressure" value="29.98" step="0.01">
-                            <span class="unit">inHg</span>
-                        </div>
-                    </div>
-
-                    <div class="input-group">
-                        <label for="visibility">Average Visibility</label>
-                        <div class="input-wrapper">
-                            <input type="number" id="visibility" value="10" step="0.1">
-                            <span class="unit">miles</span>
-                        </div>
-                    </div>
-
-                    <div class="input-group">
-                        <label for="wind">Average Wind Speed</label>
-                        <div class="input-wrapper">
-                            <input type="number" id="wind" value="12" step="0.1">
-                            <span class="unit">mph</span>
-                        </div>
-                    </div>
-
-                    <button type="submit" class="btn-predict" id="predict-btn">EXECUTE PREDICTION</button>
-                </form>
-
-                <div class="prediction-result" id="result-container" style="opacity: 0;">
-                    <div class="result-value" id="precip-value">0.42</div>
-                    <div class="result-label">Predicted Rainfall (Inches)</div>
+            <!-- Left Panel: Input & Result -->
+            <div class="left-col">
+                <section class="card animate-in">
+                    <h2>
+                        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2v20M2 12h20"/></svg>
+                        Global Parameters
+                    </h2>
                     
-                    <div class="insight-card">
-                        <div class="insight-header">
-                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></svg>
-                            AI INSIGHT
+                    <form id="prediction-form">
+                        <div class="input-row">
+                            <div class="input-group">
+                                <label for="temp">Average temperature</label>
+                                <div class="input-wrapper">
+                                    <input type="number" id="temp" value="78" step="0.1">
+                                    <span class="unit">°F</span>
+                                </div>
+                            </div>
+                            <div class="input-group">
+                                <label for="dewpoint">Dew Point</label>
+                                <div class="input-wrapper">
+                                    <input type="number" id="dewpoint" value="62" step="0.1">
+                                    <span class="unit">°F</span>
+                                </div>
+                            </div>
                         </div>
-                        <p class="insight-text" id="ai-insight">High humidity detected. Atmospheric instability suggests a 68% probability of localized showers.</p>
+
+                        <div class="input-row">
+                            <div class="input-group">
+                                <label for="humidity">Humidity</label>
+                                <div class="input-wrapper">
+                                    <input type="number" id="humidity" value="45" step="1" min="0" max="100">
+                                    <span class="unit">%</span>
+                                </div>
+                            </div>
+                            <div class="input-group">
+                                <label for="pressure">Sea Pressure</label>
+                                <div class="input-wrapper">
+                                    <input type="number" id="pressure" value="30.02" step="0.01">
+                                    <span class="unit">inHg</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="input-row">
+                            <div class="input-group">
+                                <label for="visibility">Visibility</label>
+                                <div class="input-wrapper">
+                                    <input type="number" id="visibility" value="10" step="1">
+                                    <span class="unit">mi</span>
+                                </div>
+                            </div>
+                            <div class="input-group">
+                                <label for="wind">Avg Wind Speed</label>
+                                <div class="input-wrapper">
+                                    <input type="number" id="wind" value="8.5" step="0.1">
+                                    <span class="unit">mph</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <button type="submit" class="btn-predict" id="predict-btn">RUN NEURAL ANALYSIS</button>
+                    </form>
+
+                    <div class="prediction-result" id="result-container" style="display: none; opacity: 0;">
+                        <div class="result-display">
+                            <div class="result-number">
+                                <span class="result-value" id="precip-value">0.00</span>
+                                <span class="result-unit">INCHES</span>
+                            </div>
+                            <div class="result-meta">PREDICTED LIQUID CONTENT</div>
+                        </div>
+                        
+                        <div class="insight-card">
+                            <div class="insight-header">
+                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></svg>
+                                AI HEURISTIC FEEDBACK
+                            </div>
+                            <p class="insight-text" id="ai-insight">Awaiting parameter submission for localized atmosphere modeling.</p>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- New Module: Regional Analysis -->
+                <section class="card animate-in delay-1 mt-2">
+                    <h2>
+                        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
+                        Target Geo-Zone
+                    </h2>
+                    <div class="region-grid">
+                        <div class="region-card active" data-region="central">
+                            <div class="r-title">CENTRAL</div>
+                            <div class="r-desc">Stable air, urban heat factors.</div>
+                        </div>
+                        <div class="region-card" data-region="coast">
+                            <div class="r-title">COASTAL</div>
+                            <div class="r-desc">High moisture, rapid wind shifts.</div>
+                        </div>
+                        <div class="region-card" data-region="arid">
+                            <div class="r-title">ARID</div>
+                            <div class="r-desc">Low humidity, high evaporative loss.</div>
+                        </div>
+                    </div>
+                </section>
+            </div>
+
+            <!-- Right Panel: Visualizer Modules -->
+            <div class="right-col">
+                <!-- Forecast Slider -->
+                <div class="card animate-in delay-2">
+                    <div class="card-header-flex">
+                        <h2>
+                            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+                            Extended Probability Forecast
+                        </h2>
+                        <div class="live-pulse">LIVE FEED</div>
+                    </div>
+                    <div class="forecast-container" id="forecast-wrapper">
+                        <!-- Dynamic items -->
                     </div>
                 </div>
-            </section>
 
-            <!-- Right Panel: Visualization -->
-            <section class="viz-panel">
-                <div class="card animate-in delay-1">
+                <!-- Main Visualization -->
+                <div class="card animate-in delay-3">
                     <h2>
-                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 3v18h18"/><path d="M18 17l-6-6-4 4-5-5"/></svg>
-                        Precipitation Trends
+                        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"/><path d="M18 17l-6-6-4 4-5-5"/></svg>
+                        Atmospheric Telemetry Trends
                     </h2>
-                    <div class="chart-container">
+                    <div class="chart-container-lg">
                         <canvas id="precipChart"></canvas>
                     </div>
                 </div>
 
-                <div class="card animate-in delay-2">
-                    <h2>
-                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21.21 15.89A10 10 0 1 1 8 2.13a10 10 0 0 0 13.21 13.76z"/></svg>
-                        Model Performance
-                    </h2>
-                    <div class="chart-container">
-                        <canvas id="accuracyChart"></canvas>
+                <!-- Secondary Visuals -->
+                <div class="dual-row">
+                    <div class="card animate-in delay-4">
+                        <h3>Model Weights</h3>
+                        <div class="chart-container-sm">
+                            <canvas id="accuracyChart"></canvas>
+                        </div>
+                    </div>
+                    <div class="card animate-in delay-4">
+                        <h3>Export System</h3>
+                        <p class="small-text">Prepare the current analysis for external reporting or cloud archival.</p>
+                        <div class="btn-group-v">
+                            <button class="btn-secondary" id="export-btn">GENERATE DATASHEET</button>
+                            <button class="btn-ghost">TRIGGER API UPLOAD</button>
+                        </div>
                     </div>
                 </div>
-            </section>
+            </div>
         </main>
+
+        <!-- Sidebar / Knowledge Panel -->
+        <div class="sidebar" id="sidebar">
+            <div class="sidebar-header">
+                <h3>METEOROLOGICAL KNOWLEDGE</h3>
+                <button id="close-sidebar">&times;</button>
+            </div>
+            <div class="sidebar-content">
+                <div class="topic">
+                    <span class="topic-tag">BASICS</span>
+                    <h4>Relative Humidity vs Rainfall</h4>
+                    <p>High relative humidity increases the likelihood but doesn't guarantee precipitation. It indicates the saturation level of the air mass.</p>
+                </div>
+                <div class="topic">
+                    <span class="topic-tag">ADVANCED</span>
+                    <h4>The Dew Point Divergence</h4>
+                    <p>When the temperature and dew point are within 3-5 degrees, the air is nearly saturated, often leading to fog or precipitation onset.</p>
+                </div>
+                <div class="topic">
+                    <span class="topic-tag">ALGORITHM</span>
+                    <h4>Aquila Pro Logic</h4>
+                    <p>Utilizing a weighted Random Forest ensemble, we simulate 500 parallel weather scenarios to arrive at the median predicted rainfall.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- UI Overlay for report generation -->
+    <div id="loader-overlay" class="overlay" style="display: none;">
+        <div class="loader-content">
+            <div class="spinner"></div>
+            <p>CONSTRUCTIONG ANALYTIC DATASHEET...</p>
+        </div>
     </div>
 
     <script src="script.js"></script>
