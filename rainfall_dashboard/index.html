@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AQUILA AI | Advanced Rainfall Prediction</title>
+    <meta name="description" content="Advanced Rainfall Prediction System using machine learning and real-time weather metrics.">
+    <link rel="stylesheet" href="style.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <div class="logo">AQUILA AI</div>
+            <div class="status-badge">MODEL ACTIVE v2.4.0</div>
+        </header>
+
+        <main class="dashboard-grid">
+            <!-- Left Panel: Input Form -->
+            <section class="card animate-in">
+                <h2>
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2v20M2 12h20"/></svg>
+                    Analysis Parameters
+                </h2>
+                
+                <form id="prediction-form">
+                    <div class="input-group">
+                        <label for="temp">Average temperature</label>
+                        <div class="input-wrapper">
+                            <input type="number" id="temp" value="75" step="0.1">
+                            <span class="unit">°F</span>
+                        </div>
+                    </div>
+
+                    <div class="input-group">
+                        <label for="dewpoint">Average Dew Point</label>
+                        <div class="input-wrapper">
+                            <input type="number" id="dewpoint" value="65" step="0.1">
+                            <span class="unit">°F</span>
+                        </div>
+                    </div>
+
+                    <div class="input-group">
+                        <label for="humidity">Average Humidity</label>
+                        <div class="input-wrapper">
+                            <input type="number" id="humidity" value="55" step="1" min="0" max="100">
+                            <span class="unit">%</span>
+                        </div>
+                    </div>
+
+                    <div class="input-group">
+                        <label for="pressure">Sea Level Pressure</label>
+                        <div class="input-wrapper">
+                            <input type="number" id="pressure" value="29.98" step="0.01">
+                            <span class="unit">inHg</span>
+                        </div>
+                    </div>
+
+                    <div class="input-group">
+                        <label for="visibility">Average Visibility</label>
+                        <div class="input-wrapper">
+                            <input type="number" id="visibility" value="10" step="0.1">
+                            <span class="unit">miles</span>
+                        </div>
+                    </div>
+
+                    <div class="input-group">
+                        <label for="wind">Average Wind Speed</label>
+                        <div class="input-wrapper">
+                            <input type="number" id="wind" value="12" step="0.1">
+                            <span class="unit">mph</span>
+                        </div>
+                    </div>
+
+                    <button type="submit" class="btn-predict" id="predict-btn">EXECUTE PREDICTION</button>
+                </form>
+
+                <div class="prediction-result" id="result-container" style="opacity: 0;">
+                    <div class="result-value" id="precip-value">0.42</div>
+                    <div class="result-label">Predicted Rainfall (Inches)</div>
+                    
+                    <div class="insight-card">
+                        <div class="insight-header">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></svg>
+                            AI INSIGHT
+                        </div>
+                        <p class="insight-text" id="ai-insight">High humidity detected. Atmospheric instability suggests a 68% probability of localized showers.</p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Right Panel: Visualization -->
+            <section class="viz-panel">
+                <div class="card animate-in delay-1">
+                    <h2>
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 3v18h18"/><path d="M18 17l-6-6-4 4-5-5"/></svg>
+                        Precipitation Trends
+                    </h2>
+                    <div class="chart-container">
+                        <canvas id="precipChart"></canvas>
+                    </div>
+                </div>
+
+                <div class="card animate-in delay-2">
+                    <h2>
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21.21 15.89A10 10 0 1 1 8 2.13a10 10 0 0 0 13.21 13.76z"/></svg>
+                        Model Performance
+                    </h2>
+                    <div class="chart-container">
+                        <canvas id="accuracyChart"></canvas>
+                    </div>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
