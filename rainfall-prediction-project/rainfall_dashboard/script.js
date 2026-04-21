@@ -153,48 +153,58 @@ async function runNeuralScanSequence() {
     animateValue('stability-val', 82, 98, 1000, '');
 }
 
-function executeNeuralAnalysis() {
+async function executeNeuralAnalysis() {
     const d = {
         temp: parseFloat(document.getElementById('temp').value),
         dewpoint: parseFloat(document.getElementById('dewpoint').value),
         humidity: parseFloat(document.getElementById('humidity').value),
         pressure: parseFloat(document.getElementById('pressure').value),
         visibility: parseFloat(document.getElementById('visibility').value),
-        wind: parseFloat(document.getElementById('wind').value)
+        wind: parseFloat(document.getElementById('wind').value),
+        region: currentRegion
     };
-
-    let prediction = CONFIG.BASE_VAL + 
-                    (d.temp * CONFIG.COEFFS.temp) + 
-                    (d.dewpoint * CONFIG.COEFFS.dewpoint) + 
-                    (d.humidity * CONFIG.COEFFS.humidity) + 
-                    (d.pressure * CONFIG.COEFFS.pressure) + 
-                    (d.visibility * CONFIG.COEFFS.visibility) + 
-                    (d.wind * CONFIG.COEFFS.wind);
-
-    prediction *= CONFIG.REGIONS[currentRegion];
-    const finalVal = Math.max(0, prediction + (Math.random() * 0.04)).toFixed(2);
 
     const container = document.getElementById('result-container');
     const valEl = document.getElementById('precip-value');
     const insightEl = document.getElementById('ai-insight');
 
-    // Smooth reveal
-    gsap.set(container, { display: 'block' });
-    gsap.fromTo(container, { opacity: 0, y: 30 }, { opacity: 1, y: 0, duration: 0.8, ease: 'back.out(1.7)' });
-    
-    // Animate large number
-    const obj = { val: 0 };
-    gsap.to(obj, {
-        val: finalVal,
-        duration: 1.5,
-        ease: 'power3.out',
-        onUpdate: () => {
-            valEl.innerText = obj.val.toFixed(2);
-        }
-    });
+    try {
+        const response = await fetch('/api/predict', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(d)
+        });
 
-    // Insight update
-    insightEl.innerHTML = `<span class='scramble-text'>ANALYSIS COMPLETE:</span> High confidence detected in ${currentRegion} region. Suggested value: ${finalVal} inches based on current telemetry.`;
+        if (!response.ok) throw new Error('API Response Failed');
+        
+        const result = await response.json();
+        const finalVal = result.prediction;
+
+        // Smooth reveal
+        gsap.set(container, { display: 'block' });
+        gsap.fromTo(container, { opacity: 0, y: 30 }, { opacity: 1, y: 0, duration: 0.8, ease: 'back.out(1.7)' });
+        
+        // Animate large number
+        const obj = { val: 0 };
+        gsap.to(obj, {
+            val: finalVal,
+            duration: 1.5,
+            ease: 'power3.out',
+            onUpdate: () => {
+                valEl.innerText = obj.val.toFixed(2);
+            }
+        });
+
+        // Insight update
+        insightEl.innerHTML = `<span class='scramble-text'>ANALYSIS COMPLETE:</span> Model v4.0.0 processed telemetry for ${currentRegion} region. Predicted liquid content: ${finalVal} inches.`;
+    } catch (error) {
+        console.error('Prediction Error:', error);
+        insightEl.innerHTML = `<span style="color: #ff4d4d">ERROR:</span> Atmospheric telemetry link failed. Ensure backend is running.`;
+        gsap.set(container, { display: 'block' });
+        gsap.to(container, { opacity: 1, duration: 0.5 });
+    }
 }
 
 function generateForecast() {
