@@ -25,12 +25,23 @@
     cursor: default;
 }
 
+#weather-canvas {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    z-index: -1;
+    pointer-events: none;
+}
+
 body {
     background-color: var(--bg);
     color: var(--text-main);
     min-height: 100vh;
-    padding: 2rem;
-    line-height: 1.6;
+    overflow-x: hidden;
+    perspective: 1200px;
+    line-height: 1.5;
 }
 
 .container {

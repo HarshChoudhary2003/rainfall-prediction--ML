@@ -19,10 +19,12 @@ const CONFIG = {
 let currentRegion = 'central';
 let charts = {};
 let history = [];
+let weatherEngine;
 
 document.addEventListener('DOMContentLoaded', () => {
     initApp();
     startLiveClock();
+    weatherEngine = new WeatherVisualizer();
 });
 
 function startLiveClock() {
@@ -210,6 +212,7 @@ async function executeNeuralAnalysis() {
         // Update UI
         updateAdviceCard(finalVal);
         addToHistory(d.temp, finalVal);
+        weatherEngine.setWeatherType(finalVal); // Trigger animated visuals
 
         // Insight update
         insightEl.innerHTML = `<span class='scramble-text'>ANALYSIS COMPLETE:</span> Model v4.0.0 processed telemetry for ${currentRegion} region. Predicted liquid content: ${finalVal} inches.`;
@@ -266,6 +269,72 @@ function renderHistory() {
             <td>${item.predict}"</td>
         </tr>
     `).join('');
+}
+
+class WeatherVisualizer {
+    constructor() {
+        this.canvas = document.getElementById('weather-canvas');
+        if(!this.canvas) return;
+        this.ctx = this.canvas.getContext('2d');
+        this.particles = [];
+        this.type = 'sunny';
+        this.resize();
+        window.addEventListener('resize', () => this.resize());
+        this.animate();
+    }
+
+    resize() {
+        this.canvas.width = window.innerWidth;
+        this.canvas.height = window.innerHeight;
+    }
+
+    setWeatherType(precip) {
+        this.type = precip > 0.1 ? 'rain' : 'sunny';
+        this.particles = [];
+        const count = this.type === 'rain' ? 150 : 40;
+        for (let i = 0; i < count; i++) {
+            this.particles.push(this.createParticle());
+        }
+    }
+
+    createParticle() {
+        return {
+            x: Math.random() * this.canvas.width,
+            y: Math.random() * this.canvas.height,
+            length: Math.random() * 20 + 10,
+            speed: Math.random() * 10 + 5,
+            opacity: Math.random() * 0.3,
+            size: Math.random() * 2 + 1
+        };
+    }
+
+    animate() {
+        this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
+        
+        this.particles.forEach(p => {
+            if (this.type === 'rain') {
+                this.ctx.strokeStyle = `rgba(0, 242, 255, ${p.opacity})`;
+                this.ctx.lineWidth = 1;
+                this.ctx.beginPath();
+                this.ctx.moveTo(p.x, p.y);
+                this.ctx.lineTo(p.x, p.y + p.length);
+                this.ctx.stroke();
+                p.y += p.speed;
+                if (p.y > this.canvas.height) p.y = -p.length;
+            } else {
+                // Subtle solar dust for sunny days
+                this.ctx.fillStyle = `rgba(255, 255, 255, ${p.opacity * 0.5})`;
+                this.ctx.beginPath();
+                this.ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
+                this.ctx.fill();
+                p.y -= p.speed * 0.1;
+                p.x += Math.sin(p.y * 0.01) * 0.5;
+                if (p.y < 0) p.y = this.canvas.height;
+            }
+        });
+
+        requestAnimationFrame(() => this.animate());
+    }
 }
 
 function generateForecast() {
