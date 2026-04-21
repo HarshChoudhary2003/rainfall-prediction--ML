@@ -357,5 +357,68 @@ input:focus {
 }
 
 /* Utility */
-.mt-2 { margin-top: 2rem; }
-.status-glow { color: var(--success); }
+/* Advice Card Styling */
+.advice-card {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    background: var(--bg);
+    padding: 1.5rem;
+    border-radius: 20px;
+    box-shadow: var(--nm-soft);
+    text-align: left;
+    margin-top: 1rem;
+}
+
+.advice-icon {
+    font-size: 2.5rem;
+    filter: drop-shadow(0 0 10px rgba(0, 242, 255, 0.3));
+}
+
+.advice-content h4 {
+    font-size: 0.9rem;
+    color: var(--primary);
+    margin-bottom: 5px;
+}
+
+.advice-content p {
+    font-size: 0.8rem;
+    color: var(--text-dim);
+}
+
+/* History Table Styling */
+.history-table-wrapper {
+    width: 100%;
+    margin-top: 1rem;
+    overflow-x: auto;
+}
+
+.history-table {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 0 10px;
+}
+
+.history-table th {
+    text-align: left;
+    padding: 10px;
+    color: var(--text-dim);
+    font-size: 0.75rem;
+    text-transform: uppercase;
+}
+
+.history-table td {
+    padding: 15px 10px;
+    background: var(--bg);
+    font-family: var(--font-mono);
+    font-size: 0.85rem;
+}
+
+.history-table tr td:first-child { border-radius: 12px 0 0 12px; box-shadow: -5px 5px 10px var(--shadow-dark); }
+.history-table tr td:last-child { border-radius: 0 12px 12px 0; box-shadow: 5px 5px 10px var(--shadow-dark); }
+
+.history-table tr td:nth-child(even) {
+    color: var(--primary);
+}
+
+.mt-1 { margin-top: 1rem; }

@@ -18,10 +18,20 @@ const CONFIG = {
 
 let currentRegion = 'central';
 let charts = {};
+let history = [];
 
 document.addEventListener('DOMContentLoaded', () => {
     initApp();
+    startLiveClock();
 });
+
+function startLiveClock() {
+    const clockEl = document.getElementById('live-clock');
+    setInterval(() => {
+        const now = new Date();
+        clockEl.innerText = now.toLocaleTimeString([], { hour12: false });
+    }, 1000);
+}
 
 function initApp() {
     setupUIAnimations();
@@ -197,6 +207,10 @@ async function executeNeuralAnalysis() {
             }
         });
 
+        // Update UI
+        updateAdviceCard(finalVal);
+        addToHistory(d.temp, finalVal);
+
         // Insight update
         insightEl.innerHTML = `<span class='scramble-text'>ANALYSIS COMPLETE:</span> Model v4.0.0 processed telemetry for ${currentRegion} region. Predicted liquid content: ${finalVal} inches.`;
     } catch (error) {
@@ -205,6 +219,53 @@ async function executeNeuralAnalysis() {
         gsap.set(container, { display: 'block' });
         gsap.to(container, { opacity: 1, duration: 0.5 });
     }
+}
+
+function updateAdviceCard(val) {
+    const icon = document.getElementById('advice-icon');
+    const title = document.getElementById('advice-title');
+    const text = document.getElementById('advice-text');
+    
+    if (val == 0) {
+        icon.innerText = "☀️";
+        title.innerText = "CLEAR SKIES EXPECTED";
+        text.innerText = "Atmospheric stability is high. No immediate precipitation risk detected.";
+    } else if (val < 0.1) {
+        icon.innerText = "☁️";
+        title.innerText = "LIGHT OVERCAST";
+        text.innerText = "Minor moisture pockets detected. Trace amounts of precipitation possible.";
+    } else if (val < 0.5) {
+        icon.innerText = "🌦️";
+        title.innerText = "SCATTERED SHOWERS";
+        text.innerText = "Unstable air masses moving in. Recommended to carry atmospheric protection.";
+    } else {
+        icon.innerText = "⛈️";
+        title.innerText = "HEAVY PRECIPITATION";
+        text.innerText = "High liquid density detected. Significant rainfall events likely within target zone.";
+    }
+    
+    gsap.from('#advice-card', { scale: 0.95, opacity: 0, duration: 0.5, ease: 'back.out' });
+}
+
+function addToHistory(temp, predict) {
+    const time = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+    const entry = { time, region: currentRegion.toUpperCase(), temp, predict };
+    history.unshift(entry);
+    if(history.length > 5) history.pop();
+    
+    renderHistory();
+}
+
+function renderHistory() {
+    const tbody = document.querySelector('#history-log tbody');
+    tbody.innerHTML = history.map(item => `
+        <tr>
+            <td>${item.time}</td>
+            <td>${item.region}</td>
+            <td>${item.temp}°F</td>
+            <td>${item.predict}"</td>
+        </tr>
+    `).join('');
 }
 
 function generateForecast() {
