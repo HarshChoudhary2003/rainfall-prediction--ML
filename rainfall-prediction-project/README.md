@@ -21,7 +21,6 @@
   - **Telemetry Trends**: Real-time charting of precipitation variables.
   - **Probability Forecast**: Extended outlook based on current atmospheric stability.
 - **AI Heuristic Feedback**: Context-aware insights generated from neural weights.
-- **Persistence Layer**: Local prediction history log with export capability.
 - **Modern UI**: Dark-mode, high-fidelity dashboard built with GSAP and Chart.js.
 
 ---
