@@ -48,9 +48,11 @@ function setupUIAnimations() {
     // Initial Staggered Entrance
     const tl = gsap.timeline({ defaults: { ease: 'power4.out' } });
 
-    tl.to('header', { opacity: 1, y: 0, duration: 1, startAt: { y: -20 } })
+    tl.fromTo('header', { opacity: 0, y: -20 }, { opacity: 1, y: 0, duration: 1 })
       .from('.stat-card', { opacity: 0, y: 30, stagger: 0.1, duration: 0.8 }, '-=0.5')
       .from('.left-col .card', { opacity: 0, x: -50, duration: 1 }, '-=0.8')
+      .from('.input-group', { opacity: 0, y: 20, stagger: 0.1, duration: 0.6 }, '-=0.6')
+      .from('.region-card', { opacity: 0, scale: 0.8, stagger: 0.1, duration: 0.5 }, '-=0.4')
       .from('.right-col .card', { opacity: 0, x: 50, duration: 1, stagger: 0.2 }, '-=1');
 
     // Count up stats
