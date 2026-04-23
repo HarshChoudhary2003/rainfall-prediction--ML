@@ -1,10 +1,35 @@
 import os
+import sqlite3
+import datetime
 from fastapi import FastAPI, HTTPException
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel
 import joblib
 import pandas as pd
 import numpy as np
+
+# Setup SQLite Database
+def init_db():
+    conn = sqlite3.connect('predictions.db')
+    cursor = conn.cursor()
+    cursor.execute('''
+        CREATE TABLE IF NOT EXISTS history (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            timestamp TEXT,
+            temp REAL,
+            dewpoint REAL,
+            humidity REAL,
+            pressure REAL,
+            visibility REAL,
+            wind REAL,
+            region TEXT,
+            prediction REAL
+        )
+    ''')
+    conn.commit()
+    conn.close()
+
+init_db()
 
 app = FastAPI(title="Aquila Pro Rainfall Prediction API")
 
@@ -95,13 +120,49 @@ async def predict(data: WeatherData):
         # Apply region multiplier and ensure non-negative
         final_prediction = max(0, float(prediction) * multiplier)
         
+        # Log to database
+        conn = sqlite3.connect('predictions.db')
+        cursor = conn.cursor()
+        cursor.execute('''
+            INSERT INTO history (timestamp, temp, dewpoint, humidity, pressure, visibility, wind, region, prediction)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+        ''', (datetime.datetime.now().isoformat(), data.temp, data.dewpoint, data.humidity, data.pressure, data.visibility, data.wind, data.region, round(final_prediction, 2)))
+        conn.commit()
+        conn.close()
+
         return {
             "prediction": round(final_prediction, 2),
             "status": "success",
-            "model_version": "RandomForest-v4.0"
+            "model_version": "RandomForest-v4.0-Optimized"
         }
     except Exception as e:
         raise HTTPException(status_code=400, detail=f"Prediction error: {str(e)}")
+
+@app.get("/api/history")
+async def get_history(limit: int = 10):
+    try:
+        conn = sqlite3.connect('predictions.db')
+        cursor = conn.cursor()
+        cursor.execute('''
+            SELECT timestamp, temp, humidity, wind, region, prediction 
+            FROM history ORDER BY id DESC LIMIT ?
+        ''', (limit,))
+        rows = cursor.fetchall()
+        conn.close()
+        
+        history = [
+            {
+                "timestamp": row[0],
+                "temp": row[1],
+                "humidity": row[2],
+                "wind": row[3],
+                "region": row[4],
+                "prediction": row[5]
+            } for row in rows
+        ]
+        return {"status": "success", "history": history}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Database error: {str(e)}")
 
 # Serve static files from the dashboard directory
 # We'll use the existing directory structure

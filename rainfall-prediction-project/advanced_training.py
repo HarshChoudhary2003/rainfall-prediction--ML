@@ -1,7 +1,7 @@
 import pandas as pd
 import numpy as np
 from sklearn.ensemble import RandomForestRegressor
-from sklearn.model_selection import train_test_split
+from sklearn.model_selection import train_test_split, RandomizedSearchCV
 from sklearn.preprocessing import StandardScaler
 from sklearn.metrics import mean_absolute_error, mean_squared_error, r2_score
 import joblib
@@ -39,24 +39,42 @@ def train():
     X_train_scaled = scaler.fit_transform(X_train)
     X_test_scaled = scaler.transform(X_test)
 
-    print("--- Training Advanced Random Forest Model ---")
+    print("--- Training Advanced Random Forest Model with Hyperparameter Tuning ---")
     
-    # Random Forest Model
-    rf = RandomForestRegressor(n_estimators=100, random_state=42, n_jobs=-1)
-    rf.fit(X_train_scaled, y_train)
+    # Random Forest Model Base
+    rf_base = RandomForestRegressor(random_state=42)
+
+    # Hyperparameter Grid
+    param_dist = {
+        'n_estimators': [50, 100, 200],
+        'max_depth': [None, 10, 20],
+        'min_samples_split': [2, 5],
+        'min_samples_leaf': [1, 2]
+    }
+
+    # Randomized Search
+    rf_random = RandomizedSearchCV(estimator=rf_base, param_distributions=param_dist,
+                                   n_iter=5, cv=3, verbose=2, random_state=42, n_jobs=-1)
+    
+    rf_random.fit(X_train_scaled, y_train)
+
+    print(f"\nBest Parameters found: {rf_random.best_params_}")
+    
+    # Best Model
+    best_rf = rf_random.best_estimator_
 
     # Evaluation
-    predictions = rf.predict(X_test_scaled)
+    predictions = best_rf.predict(X_test_scaled)
     mae = mean_absolute_error(y_test, predictions)
     mse = mean_squared_error(y_test, predictions)
     r2 = r2_score(y_test, predictions)
 
-    print(f"Mean Absolute Error: {mae:.4f}")
+    print(f"\nMean Absolute Error: {mae:.4f}")
     print(f"Mean Squared Error: {mse:.4f}")
     print(f"R2 Score: {r2:.4f}")
 
     # Feature Importance
-    importances = rf.feature_importances_
+    importances = best_rf.feature_importances_
     feature_names = X.columns
     sorted_idx = np.argsort(importances)[::-1]
 
@@ -68,9 +86,9 @@ def train():
     if not os.path.exists('models'):
         os.makedirs('models')
         
-    joblib.dump(rf, 'models/rainfall_rf_model.pkl')
+    joblib.dump(best_rf, 'models/rainfall_rf_model.pkl')
     joblib.dump(scaler, 'models/scaler.pkl')
-    print("\nModel and Scaler successfully saved to the 'models' directory.")
+    print("\nOptimized Model and Scaler successfully saved to the 'models' directory.")
 
 if __name__ == "__main__":
     train()
