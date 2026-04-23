@@ -164,6 +164,40 @@ async def get_history(limit: int = 10):
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Database error: {str(e)}")
 
+@app.get("/api/model-info")
+async def get_model_info():
+    if model is None:
+        raise HTTPException(status_code=500, detail="Model not loaded on server.")
+    try:
+        imps = model.feature_importances_
+        weights = {
+            "temp": sum(imps[0:3]),
+            "dewpoint": sum(imps[3:6]),
+            "humidity": sum(imps[6:9]),
+            "pressure": sum(imps[9:11]),
+            "visibility": sum(imps[11:14]),
+            "wind": sum(imps[14:17])
+        }
+        total = sum(weights.values())
+        weights_pct = {k: round((v / total) * 100, 1) for k, v in weights.items()}
+        return {"status": "success", "weights": weights_pct}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error extracting weights: {str(e)}")
+
+@app.get("/api/forecast")
+async def get_forecast():
+    import random
+    forecast = []
+    base = 0.2
+    for i in range(7):
+        val = max(0, base + random.uniform(-0.1, 0.4))
+        prob = int(min(100, max(0, val * 150 + random.randint(-10, 30))))
+        forecast.append({
+            "value": round(val, 2),
+            "probability": prob
+        })
+    return {"status": "success", "forecast": forecast}
+
 # Serve static files from the dashboard directory
 # We'll use the existing directory structure
 app.mount("/", StaticFiles(directory="rainfall_dashboard", html=True), name="static")

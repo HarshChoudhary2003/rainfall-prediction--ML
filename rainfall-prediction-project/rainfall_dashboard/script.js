@@ -276,12 +276,13 @@ function updateAdviceCard(val) {
 
 async function fetchHistory() {
     try {
-        const res = await fetch('/api/history?limit=5');
+        const res = await fetch('/api/history?limit=10');
         const data = await res.json();
         if (data.status === 'success') {
             historyData = data.history.map(item => {
                 const dateObj = new Date(item.timestamp);
                 return {
+                    timestamp: item.timestamp,
                     time: dateObj.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
                     region: item.region.toUpperCase(),
                     temp: item.temp,
@@ -289,6 +290,22 @@ async function fetchHistory() {
                 };
             });
             renderHistory();
+            
+            // Update Telemetry Chart
+            if (charts.precip) {
+                const recent7 = historyData.slice(0, 7).reverse();
+                const labels = recent7.map(item => item.time);
+                const values = recent7.map(item => item.predict);
+                
+                while(labels.length < 7) {
+                    labels.unshift('-');
+                    values.unshift(0);
+                }
+                
+                charts.precip.data.labels = labels;
+                charts.precip.data.datasets[0].data = values;
+                charts.precip.update();
+            }
         }
     } catch (e) {
         console.error("Failed to fetch history:", e);
@@ -377,25 +394,35 @@ class WeatherVisualizer {
     }
 }
 
-function generateForecast() {
+async function generateForecast() {
     const wrapper = document.getElementById('forecast-wrapper');
+    wrapper.innerHTML = '';
     const days = ['MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT', 'SUN'];
-    const startIdx = new Date().getDay() - 1;
+    const startIdx = new Date().getDay() === 0 ? 6 : new Date().getDay() - 1;
 
-    for (let i = 0; i < 6; i++) {
-        const day = days[(startIdx + i) % 7];
-        const val = (Math.random() * 0.5).toFixed(2);
-        
-        const item = document.createElement('div');
-        item.className = 'forecast-item';
-        item.innerHTML = `
-            <div class="f-day">${day}</div>
-            <div class="f-val">${val}"</div>
-            <div class="f-prob">${Math.floor(Math.random()*80)}%</div>
-        `;
-        wrapper.appendChild(item);
-        
-        gsap.from(item, { opacity: 0, scale: 0.8, duration: 0.5, delay: 1 + (i * 0.1) });
+    try {
+        const res = await fetch('/api/forecast');
+        const data = await res.json();
+        if (data.status === 'success') {
+            for (let i = 0; i < 6; i++) {
+                const day = days[(startIdx + i) % 7];
+                const val = data.forecast[i].value;
+                const prob = data.forecast[i].probability;
+                
+                const item = document.createElement('div');
+                item.className = 'forecast-item';
+                item.innerHTML = `
+                    <div class="f-day">${day}</div>
+                    <div class="f-val">${val.toFixed(2)}"</div>
+                    <div class="f-prob">${prob}%</div>
+                `;
+                wrapper.appendChild(item);
+                
+                gsap.from(item, { opacity: 0, scale: 0.8, duration: 0.5, delay: 1 + (i * 0.1) });
+            }
+        }
+    } catch (e) {
+        console.error('Failed to fetch forecast:', e);
     }
 }
 
@@ -403,13 +430,13 @@ function initCharts() {
     const themeColor = '#00f2ff';
     const precipCtx = document.getElementById('precipChart').getContext('2d');
     
-    new Chart(precipCtx, {
+    charts.precip = new Chart(precipCtx, {
         type: 'line',
         data: {
-            labels: ['00:00', '04:00', '08:00', '12:00', '16:00', '20:00', 'NOW'],
+            labels: ['-', '-', '-', '-', '-', '-', 'NOW'],
             datasets: [{
-                label: 'Simulated Feed',
-                data: [5, 12, 8, 24, 15, 30, 10],
+                label: 'Prediction Feed',
+                data: [0, 0, 0, 0, 0, 0, 0],
                 borderColor: themeColor,
                 borderWidth: 3,
                 tension: 0.4,
@@ -437,12 +464,12 @@ function initCharts() {
     });
 
     const accCtx = document.getElementById('accuracyChart').getContext('2d');
-    new Chart(accCtx, {
+    charts.acc = new Chart(accCtx, {
         type: 'radar',
         data: {
-            labels: ['T', 'H', 'W', 'P', 'D', 'V'],
+            labels: ['TEMP', 'DEW', 'HUM', 'PRES', 'VIS', 'WIND'],
             datasets: [{
-                data: [60, 90, 40, 75, 80, 30],
+                data: [20, 20, 20, 20, 10, 10],
                 backgroundColor: 'rgba(255, 0, 122, 0.15)',
                 borderColor: '#ff007a',
                 borderWidth: 2,
@@ -462,4 +489,20 @@ function initCharts() {
             }
         }
     });
+    
+    fetchModelInfo();
+}
+
+async function fetchModelInfo() {
+    try {
+        const res = await fetch('/api/model-info');
+        const data = await res.json();
+        if (data.status === 'success') {
+            const w = data.weights;
+            charts.acc.data.datasets[0].data = [w.temp, w.dewpoint, w.humidity, w.pressure, w.visibility, w.wind];
+            charts.acc.update();
+        }
+    } catch (e) {
+        console.error("Failed to fetch model info:", e);
+    }
 }
