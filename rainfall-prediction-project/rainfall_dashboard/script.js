@@ -18,7 +18,7 @@ const CONFIG = {
 
 let currentRegion = 'central';
 let charts = {};
-let history = [];
+let historyData = [];
 let weatherEngine;
 
 document.addEventListener('DOMContentLoaded', () => {
@@ -41,6 +41,7 @@ function initApp() {
     generateForecast();
     setupEventListeners();
     setupMouseTracking();
+    fetchHistory();
 }
 
 function setupUIAnimations() {
@@ -120,7 +121,7 @@ function setupEventListeners() {
         });
     });
 
-    // Export Simulation
+    // Export Simulation & Actual Download
     document.getElementById('export-btn').addEventListener('click', () => {
         const overlay = document.getElementById('loader-overlay');
         const text = overlay.querySelector('p');
@@ -128,7 +129,7 @@ function setupEventListeners() {
         gsap.set(overlay, { display: 'flex', opacity: 0 });
         gsap.to(overlay, { opacity: 1, duration: 0.5 });
         
-        const phases = ["INITIALIZING BUFFER...", "STAGING DATASET...", "COMPILING REPORT...", "ARCHIVING TO CLOUD..."];
+        const phases = ["INITIALIZING BUFFER...", "STAGING DATASET...", "COMPILING REPORT...", "PREPARING DOWNLOAD..."];
         let i = 0;
         const interval = setInterval(() => {
             text.innerText = phases[i++];
@@ -138,11 +139,32 @@ function setupEventListeners() {
                 setTimeout(() => {
                     gsap.to(overlay, { opacity: 0, duration: 0.5, onComplete: () => {
                         gsap.set(overlay, { display: 'none' });
+                        downloadCSV();
                     }});
                 }, 1000);
             }
         }, 800);
     });
+}
+
+function downloadCSV() {
+    if (!historyData || historyData.length === 0) {
+        alert("No historical data available to export.");
+        return;
+    }
+    const headers = ["Time", "Region", "Temperature", "Prediction"];
+    const rows = historyData.map(row => [row.time, row.region, row.temp, row.predict]);
+    const csvContent = "data:text/csv;charset=utf-8," 
+        + headers.join(",") + "\n" 
+        + rows.map(e => e.join(",")).join("\n");
+        
+    const encodedUri = encodeURI(csvContent);
+    const link = document.createElement("a");
+    link.setAttribute("href", encodedUri);
+    link.setAttribute("download", `aquila_pro_report_${new Date().getTime()}.csv`);
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
 }
 
 async function runNeuralScanSequence() {
@@ -211,7 +233,7 @@ async function executeNeuralAnalysis() {
 
         // Update UI
         updateAdviceCard(finalVal);
-        addToHistory(d.temp, finalVal);
+        fetchHistory(); // Refresh history from backend
         weatherEngine.setWeatherType(finalVal); // Trigger animated visuals
 
         // Insight update
@@ -250,18 +272,34 @@ function updateAdviceCard(val) {
     gsap.from('#advice-card', { scale: 0.95, opacity: 0, duration: 0.5, ease: 'back.out' });
 }
 
-function addToHistory(temp, predict) {
-    const time = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-    const entry = { time, region: currentRegion.toUpperCase(), temp, predict };
-    history.unshift(entry);
-    if(history.length > 5) history.pop();
-    
-    renderHistory();
+async function fetchHistory() {
+    try {
+        const res = await fetch('/api/history?limit=5');
+        const data = await res.json();
+        if (data.status === 'success') {
+            historyData = data.history.map(item => {
+                const dateObj = new Date(item.timestamp);
+                return {
+                    time: dateObj.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+                    region: item.region.toUpperCase(),
+                    temp: item.temp,
+                    predict: item.prediction
+                };
+            });
+            renderHistory();
+        }
+    } catch (e) {
+        console.error("Failed to fetch history:", e);
+    }
 }
 
 function renderHistory() {
     const tbody = document.querySelector('#history-log tbody');
-    tbody.innerHTML = history.map(item => `
+    if (!historyData || historyData.length === 0) {
+        tbody.innerHTML = `<tr class="empty-row"><td colspan="4">No historical data available.</td></tr>`;
+        return;
+    }
+    tbody.innerHTML = historyData.map(item => `
         <tr>
             <td>${item.time}</td>
             <td>${item.region}</td>
